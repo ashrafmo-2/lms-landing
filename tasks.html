@@ -323,57 +323,92 @@
     </main>
 
     <!-- Scripts for Interactivity -->
-    <script>
-        // تفعيل أيقونات Lucide
-        lucide.createIcons();
+<script>
+    // تفعيل أيقونات Lucide
+    lucide.createIcons();
 
-        // وظيفة التبديل بين التبويبات
-        function switchTab(tabId) {
-            // إخفاء كل المحتوى
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            // إعادة الأزرار للحالة غير النشطة
-            document.getElementById('btn-admin').className = "px-6 py-3 text-sm font-bold border-b-2 border-transparent text-slate hover:text-dark transition-colors duration-200";
-            document.getElementById('btn-student').className = "px-6 py-3 text-sm font-bold border-b-2 border-transparent text-slate hover:text-dark transition-colors duration-200";
-            
-            // تفعيل التبويب المختار
-            document.getElementById(`tab-${tabId}`).classList.add('active');
-            document.getElementById(`btn-${tabId}`).className = "px-6 py-3 text-sm font-bold border-b-2 transition-colors duration-200 border-primary-600 text-primary-600";
+    // وظيفة التبديل بين التبويبات
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+
+        document.getElementById('btn-admin').className =
+            "px-6 py-3 text-sm font-bold border-b-2 border-transparent text-slate hover:text-dark transition-colors duration-200";
+
+        document.getElementById('btn-student').className =
+            "px-6 py-3 text-sm font-bold border-b-2 border-transparent text-slate hover:text-dark transition-colors duration-200";
+
+        document.getElementById(`tab-${tabId}`).classList.add('active');
+
+        document.getElementById(`btn-${tabId}`).className =
+            "px-6 py-3 text-sm font-bold border-b-2 transition-colors duration-200 border-primary-600 text-primary-600";
+    }
+
+    // وظيفة حساب نسبة الإنجاز الكلية
+    function updateProgress() {
+        const checkboxes = document.querySelectorAll('.custom-checkbox');
+        const checkedBoxes = document.querySelectorAll('.custom-checkbox:checked');
+
+        const total = checkboxes.length;
+        const completed = checkedBoxes.length;
+        const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+        document.getElementById('overall-progress-bar').style.width = `${percentage}%`;
+        document.getElementById('overall-progress-text').innerText = `${percentage}%`;
+
+        if (percentage === 100) {
+            document.getElementById('overall-progress-bar').classList.remove('bg-success');
+            document.getElementById('overall-progress-bar').classList.add('bg-primary-600');
+
+            document.getElementById('overall-progress-text').classList.remove('text-success');
+            document.getElementById('overall-progress-text').classList.add('text-primary-600');
+        } else {
+            document.getElementById('overall-progress-bar').classList.add('bg-success');
+            document.getElementById('overall-progress-bar').classList.remove('bg-primary-600');
+
+            document.getElementById('overall-progress-text').classList.add('text-success');
+            document.getElementById('overall-progress-text').classList.remove('text-primary-600');
         }
+    }
 
-        // وظيفة حساب نسبة الإنجاز الكلية
-        function updateProgress() {
-            const checkboxes = document.querySelectorAll('.custom-checkbox');
-            const checkedBoxes = document.querySelectorAll('.custom-checkbox:checked');
-            
-            const total = checkboxes.length;
-            const completed = checkedBoxes.length;
-            const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
+    // حفظ البيانات في localStorage
+    function saveCheckboxes() {
+        const checkboxes = document.querySelectorAll('.custom-checkbox');
 
-            // تحديث الشريط والنص
-            document.getElementById('overall-progress-bar').style.width = `${percentage}%`;
-            document.getElementById('overall-progress-text').innerText = `${percentage}%`;
+        const data = [];
 
-            // تغيير لون الشريط إذا اكتمل
-            if(percentage === 100) {
-                document.getElementById('overall-progress-bar').classList.remove('bg-success');
-                document.getElementById('overall-progress-bar').classList.add('bg-primary-600');
-                document.getElementById('overall-progress-text').classList.remove('text-success');
-                document.getElementById('overall-progress-text').classList.add('text-primary-600');
-            } else {
-                document.getElementById('overall-progress-bar').classList.add('bg-success');
-                document.getElementById('overall-progress-bar').classList.remove('bg-primary-600');
-                document.getElementById('overall-progress-text').classList.add('text-success');
-                document.getElementById('overall-progress-text').classList.remove('text-primary-600');
-            }
-        }
-
-        // إضافة مستمعي الأحداث لجميع الـ checkboxes
-        document.querySelectorAll('.custom-checkbox').forEach(box => {
-            box.addEventListener('change', updateProgress);
+        checkboxes.forEach((box, index) => {
+            data[index] = box.checked;
         });
 
-        // تهيئة مبدئية
-        updateProgress();
-    </script>
+        localStorage.setItem('checklistData', JSON.stringify(data));
+    }
+
+    // تحميل البيانات من localStorage
+    function loadCheckboxes() {
+        const savedData = JSON.parse(localStorage.getItem('checklistData'));
+
+        if (!savedData) return;
+
+        const checkboxes = document.querySelectorAll('.custom-checkbox');
+
+        checkboxes.forEach((box, index) => {
+            box.checked = savedData[index] || false;
+        });
+    }
+
+    // تحميل البيانات أولاً
+    loadCheckboxes();
+
+    // إضافة الأحداث
+    document.querySelectorAll('.custom-checkbox').forEach(box => {
+        box.addEventListener('change', () => {
+            saveCheckboxes();
+            updateProgress();
+        });
+    });
+
+    // تشغيل أولي
+    updateProgress();
+</script>
 </body>
 </html>
